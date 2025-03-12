@@ -2,7 +2,7 @@
 # Define variables
 variable "region" {
   description = "The AWS region"
-  default     = "us-west-2"  # Adjust as needed
+  default     = "us-west-2" # Adjust as needed
 }
 
 # variable "lambda_function_arn" {
@@ -28,10 +28,11 @@ variable "name" {
 variable "api_resources" {
   description = "Map of API resources, methods, and associated Lambda functions"
   type = map(object({
-    path_part           = string
-    methods             = list(string)
-    lambda_function_arn = string
+    path_part            = string
+    methods              = list(string)
+    lambda_function_arn  = string
     lambda_function_name = string
+    gateway_type         = optional(string) # Can be at least AWS or AWS_PROXY, defaults to AWS in code
   }))
 }
 
@@ -42,6 +43,5 @@ variable "api_stages" {
 
 variable "allowed_ips" {
   description = "allowed IP"
-  type = list (string)
-  
+  type        = list(string)
 }
