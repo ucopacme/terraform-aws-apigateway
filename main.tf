@@ -7,7 +7,7 @@ data "aws_caller_identity" "current" {}
 # Define the API Gateway
 resource "aws_api_gateway_rest_api" "rest_api" {
   name        = var.name
-  description = "API Gateway with Lambda integration (non-proxy) and CORS enabled"
+  description = "API Gateway with Lambda integration (defaults non-proxy) and CORS enabled"
 }
 
 # Loop over each resource in api_resources
@@ -37,7 +37,7 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   resource_id             = aws_api_gateway_resource.api_resource[each.key].id
   http_method             = aws_api_gateway_method.api_method[each.key].http_method
   integration_http_method = "POST"
-  type                    = "AWS"
+  type                    = each.value.gateway_type != null ? each.value.gateway_type : "AWS"
   uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${each.value.lambda_function_arn}/invocations"
 
   # Remove dynamic references
