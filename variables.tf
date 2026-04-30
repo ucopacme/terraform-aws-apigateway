@@ -32,7 +32,8 @@ variable "api_resources" {
     methods              = list(string)
     lambda_function_arn  = string
     lambda_function_name = string
-    gateway_type         = optional(string) # Can be at least AWS or AWS_PROXY, defaults to AWS in code
+    gateway_type         = optional(string)
+    timeout_milliseconds = optional(number)
   }))
 }
 
@@ -44,4 +45,10 @@ variable "api_stages" {
 variable "allowed_ips" {
   description = "allowed IP"
   type        = list(string)
+}
+
+variable "cognito_user_pool_arn" {
+  description = "Cognito User Pool ARN for API authorization. Leave empty to disable."
+  type        = string
+  default     = ""
 }

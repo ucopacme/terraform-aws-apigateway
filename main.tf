@@ -19,14 +19,24 @@ resource "aws_api_gateway_resource" "api_resource" {
   path_part   = each.value.path_part
 }
 
+# Cognito Authorizer (created only when cognito_user_pool_arn is provided)
+resource "aws_api_gateway_authorizer" "cognito" {
+  count         = var.cognito_user_pool_arn != "" ? 1 : 0
+  name          = "${var.name}-cognito-authorizer"
+  rest_api_id   = aws_api_gateway_rest_api.rest_api.id
+  type          = "COGNITO_USER_POOLS"
+  provider_arns = [var.cognito_user_pool_arn]
+}
+
 # Loop over each resource to create methods
 resource "aws_api_gateway_method" "api_method" {
   for_each = var.api_resources
 
   rest_api_id   = aws_api_gateway_rest_api.rest_api.id
   resource_id   = aws_api_gateway_resource.api_resource[each.key].id
-  http_method   = each.value.methods[0]  # Using the first method as an example
-  authorization = "NONE"                 # Adjust as needed
+  http_method   = each.value.methods[0]
+  authorization = var.cognito_user_pool_arn != "" ? "COGNITO_USER_POOLS" : "NONE"
+  authorizer_id = var.cognito_user_pool_arn != "" ? aws_api_gateway_authorizer.cognito[0].id : null
 }
 
 # Integrate the methods with the respective Lambda function for each resource
@@ -38,6 +48,7 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   http_method             = aws_api_gateway_method.api_method[each.key].http_method
   integration_http_method = "POST"
   type                    = each.value.gateway_type != null ? each.value.gateway_type : "AWS"
+  timeout_milliseconds    = each.value.timeout_milliseconds != null ? each.value.timeout_milliseconds : 29000
   uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${each.value.lambda_function_arn}/invocations"
 
   # Remove dynamic references

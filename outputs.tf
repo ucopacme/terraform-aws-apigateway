@@ -17,3 +17,13 @@
 output "api_urls" {
   value = { for stage in var.api_stages : stage => "${aws_api_gateway_rest_api.rest_api.execution_arn}/${stage}/example" }
 }
+
+output "invoke_url" {
+  description = "The invoke URL of the API Gateway stage"
+  value       = aws_api_gateway_stage.api_stage.invoke_url
+}
+
+output "rest_api_id" {
+  description = "The ID of the REST API"
+  value       = aws_api_gateway_rest_api.rest_api.id
+}
