@@ -229,10 +229,10 @@ resource "aws_api_gateway_deployment" "api_deployment" {
 
   rest_api_id = aws_api_gateway_rest_api.rest_api.id
 
-  # Dynamic triggers to force a new deployment on changes
+  # Only redeploy when API configuration actually changes
   triggers = {
-    deployment_timestamp = timestamp()
-    #api_resources_hash   = md5(jsonencode(aws_api_gateway_resource.api_resource))
+    api_resources_hash = sha256(jsonencode(var.api_resources))
+    api_policy_hash    = sha256(jsonencode(var.allowed_ips))
   }
 }
 
